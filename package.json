@@ -12,7 +12,8 @@
     "next": "^14.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "openai": "^4.20.0"
+    "openai": "^4.20.0",
+    "@libsql/client": "^0.14.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

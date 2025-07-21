@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
+import { recordPromptUsage, initializeDatabase } from '../../lib/database';
 
 // Types
 interface ChatRequest {
@@ -220,8 +221,23 @@ export default async function handler(
     const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     logRequest(question, Array.isArray(clientIp) ? clientIp[0] : clientIp);
 
-    // Generate answer using OpenAI
+    // Generate answer using Groq
     const answer = await generateAnswer(question, docs);
+
+    // Record usage in database
+    try {
+      const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      await recordPromptUsage({
+        question: question.substring(0, 500), // Truncate for storage
+        response_length: answer.length,
+        model_used: 'llama-3.1-8b-instant', // Primary model
+        tokens_used: Math.ceil((question.length + docs.length + answer.length) / 4), // Rough estimate
+        ip_address: Array.isArray(clientIp) ? clientIp[0] : clientIp
+      });
+    } catch (dbError) {
+      console.error('Failed to record usage:', dbError);
+      // Don't fail the request if database recording fails
+    }
 
     // Return successful response
     res.status(200).json({ answer });
