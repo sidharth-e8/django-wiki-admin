@@ -257,7 +257,7 @@ export default function Home() {
                   {projects.map((project) => (
                     <div
                       key={project.id}
-                      onClick={() => window.open(`/project/${project.id}`, '_blank')}
+                      onClick={() => window.location.href = `/project/${project.id}`}
                       style={{
                         background: 'white',
                         cursor: 'pointer',
